@@ -103,14 +103,8 @@
     }
   };
 
-  var currentFiles = null;
   var photoInputChangeHandler = function (evt) {
     var photoFiles = evt.currentTarget.files;
-    if (currentFiles === null) {
-      currentFiles = photoFiles;
-    } else {
-      FormData;
-    }
     if (photoFiles.length > 0) {
       for (var i = 0; i < photoFiles.length; i++) {
         var fileName = photoFiles[i].name.toLowerCase();
@@ -156,7 +150,7 @@
           newPhotoContainer.style.justifyContent = 'center';
           photoElem = createPhotoElement(reader.result);
           newPhotoContainer.appendChild(photoElem);
-          appartmentPhotoImageContainer.insertAdjacentElement('beforebegin', newPhotoContainer);
+          appartmentPhotoImageContainer.insertAdjacentElement('afterend', newPhotoContainer);
         }
       }
     });
@@ -209,8 +203,8 @@
           num--;
         }
 
-        if (appartmentPhotoImageContainer.childNodes) {
-          appartmentPhotoImageContainer.removeChild(appartmentPhotoImageContainer.childNodes[0]);
+        if (appartmentPhotoImageContainers[0].childNodes.length > 0) {
+          appartmentPhotoImageContainers[0].removeChild(appartmentPhotoImageContainers[0].childNodes[0]);
         }
 
       }
