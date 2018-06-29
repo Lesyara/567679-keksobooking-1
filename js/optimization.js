@@ -2,6 +2,7 @@
 
 (function () {
   var DEBOUNCE_INTERVAL = 500;
+
   window.optimization = {
     debounce: function (func) {
       var timeoutSet = null;

@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-  var CARD_TEMPLATE = document.querySelector('template').content.querySelector('.map__card');
+  var cardTemplate = document.querySelector('template').content.querySelector('.map__card');
 
   var REALTY_TYPE = {
     'flat': 'Квартира',
@@ -40,7 +40,7 @@
    * @return {Node} adPopup
    */
     generateAdCardObject: function (adObj) {
-      var adCard = CARD_TEMPLATE.cloneNode(true);
+      var adCard = cardTemplate.cloneNode(true);
       var photoContainer = adCard.querySelector('.popup__photos');
       var featureItems = adCard.querySelectorAll('.popup__feature');
       var photoTemplate = photoContainer.querySelector('img');
@@ -92,7 +92,7 @@
       var mapCards = document.querySelectorAll('.map__card');
       if (mapCards) {
         for (var i = 0; i < mapCards.length; i++) {
-          window.map.MAP.removeChild(mapCards[i]);
+          window.map.mapContainer.removeChild(mapCards[i]);
         }
       }
     },
@@ -104,7 +104,7 @@
     renderCard: function (adObj) {
       window.card.removeCards();
       var newCard = window.card.generateAdCardObject(adObj);
-      window.map.MAP.insertBefore(newCard, window.map.FILTER_CONTAINER);
+      window.map.mapContainer.insertBefore(newCard, window.map.filterContainer);
 
       document.addEventListener('keydown', function (evt) {
         if (evt.keyCode === window.card.KEY_CODE.ESC) {

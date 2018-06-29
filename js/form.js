@@ -18,6 +18,7 @@
   var IMAGE_TYPES = ['jpeg', 'jpg', 'png', 'gif', 'svg'];
   var TITLE_MIN_LENGTH = 30;
   var TITLE_MAX_LENGTH = 100;
+  var DEFAULT_ROOM_NUMBER = 1;
   var APPARTMENT_PRICE_MAX_VALUE = 1000000;
   var HEADER_PHOTO_INPUT_NAME = 'ad-form-header__input';
   var APPARTMENT_PHOTO_INPUT_NAME = 'ad-form__input';
@@ -76,13 +77,11 @@
     timeInInput.value = evt.currentTarget.value;
   };
 
-  /**
-   * Функция - обработчик события выбора значения Количества комнат. Связывает это значение
-   * со значением поля Количество мест по заданной схеме.
-   * @param {*} evt
-   */
-  var roomsNumberInputHandler = function (evt) {
-    var optionsToLeaveValues = ROOM_NUMBER_AND_CAPACITY[evt.currentTarget.value];
+  var bindRoomsNumberAndCapacity = function (currentNumber) {
+    if (currentNumber === null) {
+      currentNumber = DEFAULT_ROOM_NUMBER;
+    }
+    var optionsToLeaveValues = ROOM_NUMBER_AND_CAPACITY[currentNumber];
     var optionsTotalNumber = roomsCapacityInput.children.length;
     var roomsCapacityInputOptions = roomsCapacityInput.children;
 
@@ -102,6 +101,17 @@
       }
     }
   };
+
+
+  /**
+   * Функция - обработчик события выбора значения Количества комнат. Связывает это значение
+   * со значением поля Количество мест по заданной схеме.
+   * @param {*} evt
+   */
+  var roomsNumberInputHandler = function (evt) {
+    bindRoomsNumberAndCapacity(evt.currentTarget.value);
+  };
+
 
   var photoInputChangeHandler = function (evt) {
     var photoFiles = evt.currentTarget.files;
@@ -170,7 +180,7 @@
       if (!addressInput.value) {
         addressInput.value = addressInput.placeholder;
       }
-      window.backend.sendData(new FormData(window.form.AD_FORM), window.map.successSendDataHandler);
+      window.backend.sendData(new FormData(window.form.AD_FORM), window.map.successSendDataHandler, window.map.serverCommunicationErrorHandler);
     },
 
     /**
@@ -190,6 +200,11 @@
         bindAppartmentTypeAndPrice(null);
         appartmentPriceInput.value = appartmentPriceInput.placeholder;
       }
+    },
+
+    setUpBindSelectControls: function () {
+      bindAppartmentTypeAndPrice(null);
+      bindRoomsNumberAndCapacity(null);
     },
 
     resetPhotoElements: function () {

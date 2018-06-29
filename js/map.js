@@ -1,33 +1,32 @@
 'use strict';
 
 (function () {
-  var MAP_PINS = document.querySelector('.map__pins');
-  var MAIN_PIN = document.querySelector('.map__pin--main');
-  var FILTER_FORM = document.querySelector('.map__filters');
-  var MAIN_PIN_IMG = MAIN_PIN.children[0];
-  var MAIN_PIN_COORDS = MAIN_PIN.getBoundingClientRect();
-  var MAIN_PIN_START_COORDS = {};
-  var SUCCESS_MESSAGE = document.querySelector('.success');
   var PIN_MARK_HEIGHT = 22;
   var MESSAGE_TIMEOUT = 5000;
 
-  var X_MIN_MAIN_PIN_SPACE = MAP_PINS.offsetLeft + (MAIN_PIN_COORDS.width / 2);
-  var X_MAX_MAIN_PIN_SPACE = MAP_PINS.offsetWidth - (MAIN_PIN_COORDS.width / 2);
-  var Y_MIN_MAIN_PIN_SPACE = 150;
-  var Y_MAX_MAIN_PIN_SPACE = 500 - MAIN_PIN_COORDS.height;
+  var mainPinStartCoord = {};
+  var pinContainer = document.querySelector('.map__pins');
+  var mainPin = document.querySelector('.map__pin--main');
+  var filterForm = document.querySelector('.map__filters');
+  var mainPinImg = mainPin.children[0];
+  var mainPinCoords = mainPin.getBoundingClientRect();
+  var successMessage = document.querySelector('.success');
 
-  var PAGE_ACTIVE = false;
+  var xMinMainPinSpace = pinContainer.offsetLeft + (mainPinCoords.width / 2);
+  var xMaxMainPinSpace = pinContainer.offsetWidth - (mainPinCoords.width / 2);
+  var yMinMainPinSpace = 150;
+  var yMaxMainPinSpace = 500 - mainPinCoords.height;
 
   /**
-    * Функция - обработчик события построения DOM-дерева. Присваивает объекту MAIN_PIN_START_COORDS
+    * Функция - обработчик события построения DOM-дерева. Присваивает объекту mainPinStartCoord
     * начальные координаты главного пина, деактивирует поля формы,
     * заполняет поле адреса.
     */
-  var DOMContentLoadedHandler = function () {
-    MAIN_PIN_START_COORDS = getCoord(MAIN_PIN, false);
+  var domContentLoadedHandler = function () {
+    mainPinStartCoord = getCoord(mainPin, false);
     window.form.disableFormFields(window.form.AD_FORM);
-    window.form.disableFormFields(FILTER_FORM);
-    window.form.fillAddressField(MAIN_PIN_START_COORDS);
+    window.form.disableFormFields(filterForm);
+    window.form.fillAddressField(mainPinStartCoord);
   };
 
   /**
@@ -70,8 +69,8 @@
       moveEvt.preventDefault();
 
       var moveShift = {
-        x: (moveEvt.pageX > X_MIN_MAIN_PIN_SPACE && moveEvt.pageX < X_MAX_MAIN_PIN_SPACE) ? startMouseCoords.x - moveEvt.pageX : 0,
-        y: (moveEvt.pageY > Y_MIN_MAIN_PIN_SPACE && moveEvt.pageY < Y_MAX_MAIN_PIN_SPACE) ? startMouseCoords.y - moveEvt.pageY : 0
+        x: (moveEvt.pageX > xMinMainPinSpace && moveEvt.pageX < xMaxMainPinSpace) ? startMouseCoords.x - moveEvt.pageX : 0,
+        y: (moveEvt.pageY > yMinMainPinSpace && moveEvt.pageY < yMaxMainPinSpace) ? startMouseCoords.y - moveEvt.pageY : 0
       };
 
       startMouseCoords = {
@@ -79,8 +78,8 @@
         y: startMouseCoords.y - moveShift.y
       };
 
-      MAIN_PIN.style.top = (MAIN_PIN.offsetTop - moveShift.y) + 'px';
-      MAIN_PIN.style.left = (MAIN_PIN.offsetLeft - moveShift.x) + 'px';
+      mainPin.style.top = (mainPin.offsetTop - moveShift.y) + 'px';
+      mainPin.style.left = (mainPin.offsetLeft - moveShift.x) + 'px';
     };
 
     /**
@@ -92,14 +91,14 @@
     var mainPinMouseUpHandler = function (mouseUpEvt) {
       mouseUpEvt.preventDefault();
       setPageActive();
-      window.form.fillAddressField(getCoord(MAIN_PIN, true));
+      window.form.fillAddressField(getCoord(mainPin, true));
 
-      MAP_PINS.removeEventListener('mousemove', mainPinMouseMoveHandler);
-      MAP_PINS.removeEventListener('mouseup', mainPinMouseUpHandler);
+      pinContainer.removeEventListener('mousemove', mainPinMouseMoveHandler);
+      pinContainer.removeEventListener('mouseup', mainPinMouseUpHandler);
     };
 
-    MAP_PINS.addEventListener('mousemove', mainPinMouseMoveHandler);
-    MAP_PINS.addEventListener('mouseup', mainPinMouseUpHandler);
+    pinContainer.addEventListener('mousemove', mainPinMouseMoveHandler);
+    pinContainer.addEventListener('mouseup', mainPinMouseUpHandler);
   };
 
 
@@ -107,20 +106,18 @@
    * Функция переведения страницы в активное состояние
    */
   var setPageActive = function () {
-    if (!PAGE_ACTIVE) {
-      if (window.map.MAP.classList.contains('map--faded')) {
-        window.map.MAP.classList.remove('map--faded');
-      }
-
-      if (window.form.AD_FORM.classList.contains('ad-form--disabled')) {
-        window.form.AD_FORM.classList.remove('ad-form--disabled');
-      }
-
-      window.backend.getData(successLoadHandler, errorLoadHandler);
-      window.form.setPriceValue();
-      window.form.enableFormFields(window.form.AD_FORM);
-      PAGE_ACTIVE = true;
+    if (window.map.mapContainer.classList.contains('map--faded')) {
+      window.map.mapContainer.classList.remove('map--faded');
     }
+
+    if (window.form.AD_FORM.classList.contains('ad-form--disabled')) {
+      window.form.AD_FORM.classList.remove('ad-form--disabled');
+    }
+
+    window.backend.getData(successLoadHandler, window.map.serverCommunicationErrorHandler);
+    window.form.setPriceValue();
+    window.form.setUpBindSelectControls();
+    window.form.enableFormFields(window.form.AD_FORM);
   };
 
   /**
@@ -129,8 +126,8 @@
   var removePins = function () {
     var mapPins = document.querySelectorAll('.map__pin');
     for (var i = 0; i < mapPins.length; i++) {
-      if (MAP_PINS.contains(mapPins[i]) && mapPins[i] !== MAIN_PIN) {
-        MAP_PINS.removeChild(mapPins[i]);
+      if (pinContainer.contains(mapPins[i]) && mapPins[i] !== mainPin) {
+        pinContainer.removeChild(mapPins[i]);
       }
     }
   };
@@ -190,53 +187,33 @@
     }
   };
 
-
   /**
    * Функция - обработчик события успешной загрузки данных с сервера, генерирует пины на основе
    * полученных данных и добавляет их в разметку.
    * @param {*} advertObjects
    */
   var successLoadHandler = function (advertObjects) {
-    window.map.PINS_DATA = advertObjects;
-    window.form.enableFormFields(FILTER_FORM);
+    window.map.pinsData = advertObjects;
+    window.form.enableFormFields(filterForm);
     window.map.renderPins(advertObjects, window.map.MAX_PIN_ON_MAP_NUMBER);
   };
 
 
   /**
-   * Функция - обработчик события ошибки при загрузке данных с сервера, отображает сообщение с текстом ошибки
-   * @param {*} errorMessage
-   */
-  var errorLoadHandler = function (errorMessage) {
-    var node = document.createElement('div');
-    node.style = 'z-index: 100; margin: 0 auto; text-align: center; background-color: red; color: white';
-    node.style.position = 'absolute';
-    node.style.left = 0;
-    node.style.right = 0;
-    node.style.fontSize = '30px';
-
-    node.textContent = errorMessage;
-    var errorMessageDiv = document.body.insertAdjacentElement('afterbegin', node);
-    setTimeout(function () {
-      errorMessageDiv.remove();
-    }, MESSAGE_TIMEOUT);
-  };
-
-  /**
    *  Функция вывода сообщения об успешной отправке данных, показывает сообщение в течение 5 секунд
    */
   var showSuccessMessage = function () {
-    SUCCESS_MESSAGE.classList.remove('hidden');
+    successMessage.classList.remove('hidden');
     setTimeout(function () {
-      SUCCESS_MESSAGE.classList.add('hidden');
+      successMessage.classList.add('hidden');
     }, MESSAGE_TIMEOUT);
   };
 
 
   window.map = {
-    MAP: document.querySelector('.map'),
-    PINS_DATA: {},
-    FILTER_CONTAINER: document.querySelector('.map__filters-container'),
+    mapContainer: document.querySelector('.map'),
+    pinsData: {},
+    filterContainer: document.querySelector('.map__filters-container'),
     MAX_PIN_ON_MAP_NUMBER: 5,
 
     /**
@@ -247,13 +224,15 @@
       window.form.AD_FORM.reset();
       window.form.setPriceValue();
 
-      MAIN_PIN.style.top = MAIN_PIN_START_COORDS.y - MAIN_PIN.clientHeight + 'px';
-      MAIN_PIN.style.left = MAIN_PIN_START_COORDS.x - MAIN_PIN.clientWidth + 'px';
+      mainPin.style.top = mainPinStartCoord.y - mainPin.clientHeight + 'px';
+      mainPin.style.left = mainPinStartCoord.x - mainPin.clientWidth + 'px';
 
-      window.form.fillAddressField(MAIN_PIN_START_COORDS);
+      window.form.fillAddressField(mainPinStartCoord);
       window.form.resetPhotoElements();
       removePins();
       window.card.removeCards();
+
+      setPageActive();
     },
 
     /**
@@ -269,6 +248,7 @@
       for (var i = 0; i < pins.length; i++) {
         var currentPin = pins[i];
         currentPin.addEventListener('click', window.card.callbackRenderCard(adObjects[i]));
+
         currentPin.addEventListener('keydown', function (evt) {
           if (evt.keyCode === window.card.KEY_CODE.ENTER) {
             currentPin.classList.remove('hidden');
@@ -278,8 +258,27 @@
 
       var filledFragment = fillFragment(pins);
       if (filledFragment !== null) {
-        MAP_PINS.appendChild(filledFragment);
+        pinContainer.appendChild(filledFragment);
       }
+    },
+
+    /**
+   * Функция - обработчик события ошибки связи с севером, отображает сообщение с текстом ошибки
+   * @param {*} errorMessage
+   */
+    serverCommunicationErrorHandler: function (errorMessage) {
+      var node = document.createElement('div');
+      node.style = 'z-index: 100; margin: 0 auto; text-align: center; background-color: red; color: white';
+      node.style.position = 'absolute';
+      node.style.left = 0;
+      node.style.right = 0;
+      node.style.fontSize = '30px';
+
+      node.textContent = errorMessage;
+      var errorMessageDiv = document.body.insertAdjacentElement('afterbegin', node);
+      setTimeout(function () {
+        errorMessageDiv.remove();
+      }, MESSAGE_TIMEOUT);
     },
 
     /**
@@ -291,6 +290,6 @@
     }
   };
 
-  document.addEventListener('DOMContentLoaded', DOMContentLoadedHandler);
-  MAIN_PIN_IMG.addEventListener('mousedown', mainPinMouseDownHandler);
+  document.addEventListener('DOMContentLoaded', domContentLoadedHandler);
+  mainPinImg.addEventListener('mousedown', mainPinMouseDownHandler);
 })();

@@ -1,11 +1,11 @@
 'use strict';
 
 (function () {
-  var MAP_FILTER_HOUSING_TYPE = document.querySelector('select[name = housing-type]');
-  var MAP_FILTER_HOUSING_PRICE = document.querySelector('select[name = housing-price]');
-  var MAP_FILTER_HOUSING_ROOMS = document.querySelector('select[name = housing-rooms]');
-  var MAP_FILTER_HOUSING_GUESTS = document.querySelector('select[name = housing-guests]');
-  var MAP_FILTER_HOUSING_FEATURES = document.querySelectorAll('input[name = features].map__checkbox');
+  var mapFilterHousingType = document.querySelector('select[name = housing-type]');
+  var mapFilterHousingPrice = document.querySelector('select[name = housing-price]');
+  var mapFilterHousingRooms = document.querySelector('select[name = housing-rooms]');
+  var mapFilterHousingGuests = document.querySelector('select[name = housing-guests]');
+  var mapFilterHousingFeatures = document.querySelectorAll('input[name = features].map__checkbox');
 
   var filterParameters = {
     'housingType': null,
@@ -23,7 +23,7 @@
    * @return {*}
    */
   var filterObjects = function () {
-    return window.map.PINS_DATA.filter(function (pinData) {
+    return window.map.pinsData.filter(function (pinData) {
       var isSuitableHouseType = (filterParameters['housingType'] === null || filterParameters['housingType'] === 'any') ? true : pinData.offer.type === filterParameters['housingType'];
 
       var priceInterval = filterParameters['priceInterval'];
@@ -58,13 +58,13 @@
         isSuitable = true;
         break;
       case 'low':
-        isSuitable = (pinData.offer.price < priceIntervalValues[0]) ? true : false;
+        isSuitable = pinData.offer.price < priceIntervalValues[0];
         break;
       case 'middle':
-        isSuitable = (pinData.offer.price >= priceIntervalValues[0] && pinData.offer.price <= priceIntervalValues[1]) ? true : false;
+        isSuitable = pinData.offer.price >= priceIntervalValues[0] && pinData.offer.price <= priceIntervalValues[1];
         break;
       case 'high':
-        isSuitable = (pinData.offer.price > priceIntervalValues[1]) ? true : false;
+        isSuitable = pinData.offer.price > priceIntervalValues[1];
         break;
     }
     return isSuitable;
@@ -174,10 +174,8 @@
    */
   var mapFilterHousingFeaturesChange = window.optimization.debounce(function (evt) {
     var fIndex = filterParameters.features.indexOf(evt.target.value);
-    if (evt.target.checked) {
-      if (fIndex === -1) {
-        filterParameters.features.push(evt.target.value);
-      }
+    if (evt.target.checked && fIndex === -1) {
+      filterParameters.features.push(evt.target.value);
     } else {
       if (fIndex !== -1) {
         filterParameters.features.splice(fIndex, 1);
@@ -187,11 +185,11 @@
     window.map.renderPins(filteredObjects, window.map.MAX_PIN_ON_MAP_NUMBER);
   });
 
-  MAP_FILTER_HOUSING_TYPE.addEventListener('change', mapFilterHousingTypeChange);
-  MAP_FILTER_HOUSING_PRICE.addEventListener('change', mapFilterHousingPriceChange);
-  MAP_FILTER_HOUSING_ROOMS.addEventListener('change', mapFilterHousingRoomsChange);
-  MAP_FILTER_HOUSING_GUESTS.addEventListener('change', mapFilterHousingGuestsChange);
-  MAP_FILTER_HOUSING_FEATURES.forEach(function (checkboxElem) {
+  mapFilterHousingType.addEventListener('change', mapFilterHousingTypeChange);
+  mapFilterHousingPrice.addEventListener('change', mapFilterHousingPriceChange);
+  mapFilterHousingRooms.addEventListener('change', mapFilterHousingRoomsChange);
+  mapFilterHousingGuests.addEventListener('change', mapFilterHousingGuestsChange);
+  mapFilterHousingFeatures.forEach(function (checkboxElem) {
     checkboxElem.addEventListener('change', mapFilterHousingFeaturesChange);
   });
 })();

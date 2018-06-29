@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-  var PIN_TEMPLATE = document.querySelector('template').content.querySelector('.map__pin');
+  var pinTemplate = document.querySelector('template').content.querySelector('.map__pin');
 
   /**
    * Функция генерации метки на основе шаблона для одного объявления
@@ -10,7 +10,7 @@
    */
   window.pin = {
     renderOnePin: function (fillObject) {
-      var pin = PIN_TEMPLATE.cloneNode(true);
+      var pin = pinTemplate.cloneNode(true);
       if (pin.hasChildNodes) {
         for (var i = 0; i < pin.childNodes.length; i++) {
           pin.childNodes[i].src = fillObject.author.avatar;
