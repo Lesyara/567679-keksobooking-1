@@ -88,7 +88,6 @@
         break;
       default:
         isSuitable = (pinData.offer.rooms === parseInt(filterParameters['roomsNumber'], 10));
-        break;
     }
     return isSuitable;
   };
