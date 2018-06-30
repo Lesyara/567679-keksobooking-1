@@ -66,6 +66,7 @@
       case 'high':
         isSuitable = pinData.offer.price > priceIntervalValues[1];
         break;
+      default: isSuitable = (pinData.offer.price === parseInt(filterParameters['priceInterval'], 10));
     }
     return isSuitable;
   };
@@ -176,11 +177,10 @@
     var fIndex = filterParameters.features.indexOf(evt.target.value);
     if (evt.target.checked && fIndex === -1) {
       filterParameters.features.push(evt.target.value);
-    } else {
-      if (fIndex !== -1) {
-        filterParameters.features.splice(fIndex, 1);
-      }
+    } else if (fIndex !== -1) {
+      filterParameters.features.splice(fIndex, 1);
     }
+
     var filteredObjects = filterObjects();
     window.map.renderPins(filteredObjects, window.map.MAX_PIN_ON_MAP_NUMBER);
   });
